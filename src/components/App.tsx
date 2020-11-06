@@ -29,8 +29,7 @@ const App: FC = () => {
 
   useEffect(() => {
     // const date = ""
-    const userId = '1'
-    const endpoint = `${process.env.REACT_APP_API_URL}/concentration_values/${userId}?limit=${limit}`
+    const endpoint = `${process.env.REACT_APP_API_URL}/concentration_values/1?limit=${limit}`
     console.log(endpoint)
 
     fetch(endpoint)
