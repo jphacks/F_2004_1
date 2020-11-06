@@ -8,13 +8,14 @@ import LimitSlider from './LimitSlider'
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    padding: theme.spacing(3)
+    padding: `${theme.spacing(5)}px 0`
   },
-  title: {
+  userName: {
     textAlign: 'center'
   },
   lineChart: {
-    margin: '50px auto 0 auto'
+    maxWidth: '100%',
+    margin: '10px auto 50px auto'
   }
 }))
 
@@ -79,9 +80,11 @@ const App: FC = () => {
   const charts = (): JSX.Element[] => {
     return users.map((user: User, index: number) => (
       <Box key={index}>
-        <Typography>{user.name}</Typography>
+        <Typography variant="h2" className={classes.userName}>
+          {user.name}
+        </Typography>
         <LineChart
-          width={1000}
+          width={2000}
           height={500}
           data={concentrationValues[index]}
           className={classes.lineChart}
@@ -91,20 +94,22 @@ const App: FC = () => {
             dataKey="datetime"
             label={{
               value: 'Datetime',
-              position: 'insideBottomRight'
+              position: 'insideBottomRight',
+              fontSize: 30
             }}
-            height={50}
+            height={70}
           />
           <YAxis
             type="number"
             domain={[1, 10]}
             label={{
-              value: 'How concentrated',
-              angle: -90
+              value: 'concentration',
+              angle: -90,
+              fontSize: 30
             }}
-            width={100}
+            width={150}
           />
-          <Tooltip formatter={value => [value, 'How concentrated']} />
+          <Tooltip formatter={value => [value, 'concentration']} />
           {/*<Legend formatter={() => 'How concentrated'} iconSize={20} />*/}
           <Line
             type="monotone"
