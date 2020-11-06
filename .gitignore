@@ -24,3 +24,6 @@ yarn-error.log*
 
 # editor state
 .idea/workspace.xml
+
+# environment variables
+.env
