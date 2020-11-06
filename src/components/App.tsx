@@ -29,7 +29,9 @@ const App: FC = () => {
 
   useEffect(() => {
     // const date = ""
-    const endpoint = `http://localhost/api/concentration_values/1?limit=${limit}`
+    const userId = '1'
+    const endpoint = `${process.env.REACT_APP_API_URL}/concentration_values/${userId}?limit=${limit}`
+    console.log(endpoint)
 
     fetch(endpoint)
       .then(response => response.json())
