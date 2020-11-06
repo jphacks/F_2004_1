@@ -3,3 +3,8 @@ export type ConcentrationValue = {
   concentrationValue: number
   isSitting: boolean
 }
+
+export type User = {
+  id: number
+  name: string
+}
