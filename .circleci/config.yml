@@ -29,4 +29,4 @@ workflows:
       - deploy_app:
           filters:
             branches:
-              only: master
+              only: main
