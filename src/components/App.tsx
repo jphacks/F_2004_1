@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts'
 import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { formatToHMS } from '../utils'
@@ -83,7 +83,7 @@ const App: FC = () => {
         <Typography variant="h2" className={classes.userName}>
           {user.name}
         </Typography>
-        <LineChart
+        <BarChart
           width={2000}
           height={500}
           data={concentrationValues[index]}
@@ -111,13 +111,8 @@ const App: FC = () => {
           />
           <Tooltip formatter={value => [value, 'concentration']} />
           {/*<Legend formatter={() => 'How concentrated'} iconSize={20} />*/}
-          <Line
-            type="monotone"
-            dataKey="concentrationValue"
-            stroke="#8884d8"
-            activeDot={{ r: 8 }}
-          />
-        </LineChart>
+          <Bar dataKey="concentrationValue" stroke="#8884d8" />
+        </BarChart>
       </Box>
     ))
   }
