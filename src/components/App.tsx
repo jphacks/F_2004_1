@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     textAlign: 'center'
   },
   lineChart: {
-    maxWidth: '100%',
+    maxWidth: '90%',
     margin: '10px auto 50px auto'
   }
 }))
@@ -85,7 +85,7 @@ const App: FC = () => {
         </Typography>
         <BarChart
           width={2000}
-          height={500}
+          height={300}
           data={concentrationValues[index]}
           className={classes.lineChart}
         >
@@ -111,7 +111,7 @@ const App: FC = () => {
           />
           <Tooltip formatter={value => [value, 'concentration']} />
           {/*<Legend formatter={() => 'How concentrated'} iconSize={20} />*/}
-          <Bar dataKey="concentrationValue" stroke="#8884d8" />
+          <Bar dataKey="concentrationValue" fill="#028C6A" />
         </BarChart>
       </Box>
     ))
