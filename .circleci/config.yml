@@ -10,7 +10,7 @@ jobs:
           command: yarn install
       - run:
           name: build
-          command: yarn build
+          command: yarn run build
       - run:
           name: install awscli
           command: |
