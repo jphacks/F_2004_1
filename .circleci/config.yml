@@ -1,32 +1,32 @@
-version: 2.1
-jobs:
-  deploy_app:
-    working_directory: ~/sample
-    docker:
-      - image: circleci/node:10-browsers
-    steps:
-      - checkout
-      - run:
-          name: node_modulesのインストール
-          command: |
-            yarn
-      - run:
-          name: ビルド
-          command: |
-            yarn run build
-      - run:
-          name: firebase-toolsのインストール
-          command: |
-            yarn add --dev firebase-tools
-      - run:
-          name: firebaseへデプロイ
-          command: |
-            ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
-workflows:
-  version: 2
-  build-deploy:
-    jobs:
-      - deploy_app:
-          filters:
-            branches:
-              only: main
+#version: 2.1
+#jobs:
+#  deploy_app:
+#    working_directory: ~/sample
+#    docker:
+#      - image: circleci/node:10-browsers
+#    steps:
+#      - checkout
+#      - run:
+#          name: node_modulesのインストール
+#          command: |
+#            yarn
+#      - run:
+#          name: ビルド
+#          command: |
+#            yarn run build
+#      - run:
+#          name: firebase-toolsのインストール
+#          command: |
+#            yarn add --dev firebase-tools
+#      - run:
+#          name: firebaseへデプロイ
+#          command: |
+#            ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
+#workflows:
+#  version: 2
+#  build-deploy:
+#    jobs:
+#      - deploy_app:
+#          filters:
+#            branches:
+#              only: main
