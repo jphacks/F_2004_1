@@ -1,10 +1,13 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts'
 import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
-import { formatToHMS } from '../utils'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
+
+interface Props {
+  userId: number
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -19,74 +22,92 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }))
 
-const Chart: FC = () => {
+const Chart: FC<Props> = (props: Props) => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
 
   const [limit, setLimit] = useState<number>(100)
-  const [users, setUsers] = useState<User[]>([])
+  const [user, setUser] = useState<User>()
   const [concentrationValues, setConcentrationValues] = useState<
-    ConcentrationValue[][]
+    ConcentrationValue[]
   >([])
 
+  // eslint-disable-next-line
+  const createErrorMessage = (status: any, message: string): string =>
+    `Request failed.\n status: ${status}, message: ${message}`
+
+  const getUser = useCallback(async (endpoint: string, userId: number): Promise<
+    User
+  > => {
+    const response = await fetch(`${endpoint}/${userId}`)
+    const json = await response.json()
+
+    if (json.status != 'success') {
+      throw Error(createErrorMessage(json.status, json.message))
+    }
+
+    return json.user
+  }, [])
+
+  const getConcentrationValues = useCallback(
+    async (
+      endpoint: string,
+      userId: number,
+      limit: number
+    ): Promise<ConcentrationValue[]> => {
+      const response = await fetch(`${endpoint}/${userId}?limit=${limit}`)
+      const json = await response.json()
+
+      if (json.status != 'success') {
+        throw Error(createErrorMessage(json.status, json.message))
+      }
+
+      return json.concentration_values
+        .map(
+          (value: Record<string, never>): ConcentrationValue => {
+            const datetime = new Date(value.created_at)
+            const concentrationValue = value.concentration_value
+            const isSitting = value.is_sitting
+
+            return {
+              datetime: datetime,
+              concentrationValue: concentrationValue,
+              isSitting: isSitting
+            }
+          }
+        )
+        .reverse()
+    },
+    []
+  )
+
   useEffect(() => {
-    fetch(`${apiUrl}/users`)
-      .then(userResponse => userResponse.json())
-      .then(userResponseJson => {
-        if (userResponseJson.status != 'success') {
-          const message = `Response status is not success\n status: ${userResponseJson.status}, message: ${userResponseJson.message}`
-          throw Error(message)
-        }
-
-        setUsers(userResponseJson.users)
-
-        userResponseJson.users.forEach((user: User, index: number) => {
-          fetch(`${apiUrl}/concentration_values/${user.id}?limit=${limit}`)
-            .then(concentrationValuesResponse =>
-              concentrationValuesResponse.json()
-            )
-            .then(concentrationValuesResponseJson => {
-              if (concentrationValuesResponseJson.status !== 'success') {
-                const message = `Response status is not success\n status: ${concentrationValuesResponseJson.status}, message: ${concentrationValuesResponseJson.message}`
-                throw Error(message)
-              }
-
-              const values: ConcentrationValue[] = concentrationValuesResponseJson.concentration_values
-                .map((value: Record<string, never>) => {
-                  const datetime = new Date(value.created_at)
-                  const concentrationValue = value.concentration_value
-                  const isSitting = value.is_sitting
-
-                  return {
-                    datetime: formatToHMS(datetime),
-                    concentrationValue: concentrationValue,
-                    isSitting: isSitting
-                  }
-                })
-                .reverse()
-
-              setConcentrationValues(prevState => {
-                const newState = JSON.parse(JSON.stringify(prevState))
-                newState[index] = values
-
-                return newState
-              })
-            })
-        })
-      })
+    getUser(`${apiUrl}/users`, props.userId)
+      .then((user: User) => setUser(user))
       .catch(error => console.log(error))
-  }, [apiUrl, limit])
 
-  const charts = (): JSX.Element[] => {
-    return users.map((user: User, index: number) => (
-      <Box key={index}>
+    getConcentrationValues(
+      `${apiUrl}/concentration_values`,
+      props.userId,
+      limit
+    )
+      .then((concentrationValues: ConcentrationValue[]) =>
+        setConcentrationValues(concentrationValues)
+      )
+      .catch(error => console.log(error))
+  }, [apiUrl, getConcentrationValues, getUser, limit, props.userId])
+
+  const chart = (): JSX.Element => {
+    // return users.map((user: User, index: number) => (
+    return (
+      <Box>
         <Typography variant="h2" className={classes.userName}>
-          {user.name}
+          {user?.name}
         </Typography>
         <BarChart
           width={2000}
           height={300}
-          data={concentrationValues[index]}
+          data={concentrationValues}
           className={classes.lineChart}
         >
           <CartesianGrid strokeDasharray="3 3" />
@@ -114,12 +135,13 @@ const Chart: FC = () => {
           <Bar dataKey="concentrationValue" fill="#028C6A" />
         </BarChart>
       </Box>
-    ))
+    )
+    // ))
   }
 
   return (
     <Box className={classes.root}>
-      {charts()}
+      {chart()}
       <LimitSlider limit={limit} setLimit={setLimit} />
     </Box>
   )
