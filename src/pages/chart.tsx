@@ -4,7 +4,7 @@ import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { formatToHMS } from '../utils'
 import { Box, Typography } from '@material-ui/core'
-import LimitSlider from './LimitSlider'
+import LimitSlider from '../components/LimitSlider'
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }))
 
-const App: FC = () => {
+const Chart: FC = () => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
 
@@ -125,4 +125,4 @@ const App: FC = () => {
   )
 }
 
-export default App
+export default Chart
