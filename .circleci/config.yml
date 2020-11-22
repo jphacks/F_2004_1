@@ -3,7 +3,7 @@ jobs:
   deploy:
     docker:
       - image: circleci/node:10-browsers
-    working_derectory: ~/repo
+    working_directory: ~/repo
     steps:
       - checkout
       - run:
