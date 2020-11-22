@@ -23,7 +23,6 @@ jobs:
             sudo python get-pip.py
             sudo pip install awscli --upgrade
             aws --version
-            aws s3 ls
       - run:
           name: deploy to s3
           command: |
