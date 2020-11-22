@@ -1,32 +1,34 @@
-version: 2.1
+version: 2
 jobs:
-  deploy_app:
-    working_directory: ~/sample
+  deploy:
     docker:
       - image: circleci/node:10-browsers
+    working_derectory: ~/repo
     steps:
-      - checkout
       - run:
-          name: node_modulesのインストール
-          command: |
-            yarn
+          name: install node_modules
+          command: yarn install
       - run:
-          name: ビルド
-          command: |
-            yarn run build
+          name: build
+          command: yarn build
       - run:
-          name: firebase-toolsのインストール
+          name: install awscli
           command: |
-            yarn add --dev firebase-tools
+            sudo apt-get update
+            sudo apt-get install -y python-dev
+            sudo curl -O https://bootstrap.pypa.io/get-pip.py
+            sudo python get-pip.py
+            sudo pip install awscli --upgrade
+            aws --version
+            aws s3 ls
       - run:
-          name: firebaseへデプロイ
-          command: |
-            ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
+          name: deploy to s3
+          command: aws s3 sync build/ s3://hosting-effective-work-frontend --delete
 workflows:
   version: 2
   build-deploy:
     jobs:
-      - deploy_app:
+      - deploy:
           filters:
             branches:
               only: main
