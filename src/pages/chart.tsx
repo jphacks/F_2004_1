@@ -4,6 +4,7 @@ import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
+import { formatToHMS } from '../utils'
 
 interface Props {
   userId: number
@@ -70,7 +71,7 @@ const Chart: FC<Props> = (props: Props) => {
             const isSitting = value.is_sitting
 
             return {
-              datetime: datetime,
+              datetime: formatToHMS(datetime),
               concentrationValue: concentrationValue,
               isSitting: isSitting
             }
