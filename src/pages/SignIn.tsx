@@ -24,7 +24,8 @@ const useStyles = makeStyles(() => ({
     marginBottom: '20px'
   },
   button: {
-    width: 100
+    width: 100,
+    marginTop: '20px'
   }
 }))
 
@@ -106,7 +107,6 @@ const SignIn: FC<Props> = (props: Props) => {
             error={isErrorUserId}
             className={classes.input}
           />
-
           <TextField
             id="user-name"
             label="お名前"
