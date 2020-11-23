@@ -1,5 +1,5 @@
 export type ConcentrationValue = {
-  datetime: Date
+  datetime: string
   concentrationValue: number
   isSitting: boolean
 }

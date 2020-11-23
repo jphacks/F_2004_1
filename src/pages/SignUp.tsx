@@ -1,8 +1,8 @@
-import React, { ChangeEvent, FC, useContext, useState } from 'react'
+import React, { ChangeEvent, FC, useState } from 'react'
 import { Box, Button, TextField, Typography } from '@material-ui/core'
 import { RouteComponentProps } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
-import UserContext from '../contexts/UserContext'
+import { createErrorMessage } from '../utils'
 
 type Props = RouteComponentProps
 
@@ -29,70 +29,78 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const SignIn: FC<Props> = (props: Props) => {
+const SignUp: FC<Props> = (props: Props) => {
   const classes = useStyles()
+  const apiUrl = process.env.REACT_APP_API_URL
 
-  const setUser = useContext(UserContext)?.setUser
-
-  const [inputtedUserId, setInputtedUserId] = useState<number | null>(null)
-  const [inputtedUserName, setInputtedUserName] = useState<string>('')
+  const [userId, setUserId] = useState<number | null>(null)
+  const [userName, setUserName] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
-  const [isErrorUserId, setIsErrorUserId] = useState<boolean>(false)
-  const [isErrorUserName, setIsErrorUserName] = useState<boolean>(false)
-  const [isErrorPassword, setIsErrorPassword] = useState<boolean>(false)
+  const [errorUserId, setErrorUserId] = useState<boolean>(false)
+  const [errorUserName, setErrorUserName] = useState<boolean>(false)
+  const [errorPassword, setErrorPassword] = useState<boolean>(false)
 
   const handleChangeUserId = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(event.target.value)
 
     if (isNaN(value)) {
-      setInputtedUserId(null)
+      setUserId(null)
       return
     }
 
-    setInputtedUserId(value)
-    setIsErrorUserId(false)
+    setUserId(value)
+    setErrorUserId(false)
   }
 
   const handleChangeUserName = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
-    setInputtedUserName(value)
+    setUserName(value)
 
-    if (value !== '') setIsErrorUserName(false)
+    if (value !== '') setErrorUserName(false)
   }
+
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
 
-    if (value !== '') setIsErrorPassword(false)
+    if (value !== '') setErrorPassword(false)
   }
 
-  const handleButtonClick = (): void => {
-    if (setUser === undefined) return
+  const handleButtonClick = async (): Promise<void> => {
+    const isValidUserId = userId !== null
+    const isValidUserName = userName !== ''
+    const isValidPassword = password !== ''
 
-    const isValidInputtedUserId = inputtedUserId !== null
-    const isValidInputtedUserName = inputtedUserName !== ''
-    const isValidInputtedPassword = password !== ''
+    setErrorUserId(!isValidUserId)
+    setErrorUserName(!isValidUserName)
+    setErrorPassword(!isValidPassword)
 
-    setIsErrorUserId(!isValidInputtedUserId)
-    setIsErrorUserName(!isValidInputtedUserName)
-    setIsErrorPassword(!isValidInputtedPassword)
+    if (!isValidUserId || !isValidPassword) return
 
-    if (inputtedUserId === null) return
-    if (!isValidInputtedUserName || !isValidInputtedPassword) return
+    const data = new FormData()
+    data.append('id', `${userId}`)
+    data.append('name', userName)
 
-    setUser({
-      id: inputtedUserId,
-      name: inputtedUserName
+    const response = await fetch(`${apiUrl}/users`, {
+      method: 'POST',
+      body: data
     })
+    const json = await response.json()
 
-    props.history.push(`/charts/${inputtedUserId}`)
+    if (json.status != 'success') {
+      throw Error(createErrorMessage(json.status, json.message))
+    }
+
+    const responseUserId = json.user.id
+
+    props.history.push(`/charts/${responseUserId}`)
   }
 
   return (
     <Box className={classes.root}>
       <Typography className={classes.typography}>
-        ユーザーIDとパスワードを入力してください。
+        お手持ちの製品に記載してあるユーザーIDと、ご自身のお名前、ご自身で考えたパスワードを入力してください。
       </Typography>
       <form noValidate autoComplete="off">
         <Box className={classes.form}>
@@ -101,21 +109,21 @@ const SignIn: FC<Props> = (props: Props) => {
             label="ユーザーID"
             required={true}
             type="number"
-            value={inputtedUserId ?? ''}
+            value={userId ?? ''}
             onChange={handleChangeUserId}
-            helperText={isErrorUserId ? 'ユーザーIDを入力してください' : ''}
-            error={isErrorUserId}
+            helperText={errorUserId ? 'ユーザーIDを入力してください' : ''}
+            error={errorUserId}
             className={classes.input}
-          />
+          />{' '}
           <TextField
             id="user-name"
             label="お名前"
             required={true}
             type="text"
-            value={inputtedUserName}
+            value={userName ?? ''}
             onChange={handleChangeUserName}
-            helperText={isErrorUserName ? 'お名前を入力してください' : ''}
-            error={isErrorUserName}
+            helperText={errorUserName ? 'お名前を入力してください' : ''}
+            error={errorUserName}
             className={classes.input}
           />
           <TextField
@@ -123,10 +131,10 @@ const SignIn: FC<Props> = (props: Props) => {
             label="パスワード"
             required={true}
             type="password"
-            value={password}
+            value={password ?? ''}
             onChange={handleChangePassword}
-            helperText={isErrorPassword ? 'パスワードを入力してください' : ''}
-            error={isErrorPassword}
+            helperText={errorPassword ? 'パスワードを入力してください' : ''}
+            error={errorPassword}
             className={classes.input}
           />
           <Button
@@ -143,4 +151,4 @@ const SignIn: FC<Props> = (props: Props) => {
   )
 }
 
-export default SignIn
+export default SignUp

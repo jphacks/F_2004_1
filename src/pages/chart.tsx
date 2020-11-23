@@ -4,10 +4,10 @@ import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
+import { createErrorMessage, formatToHMS } from '../utils'
+import { RouteComponentProps } from 'react-router-dom'
 
-interface Props {
-  userId: number
-}
+type Props = RouteComponentProps<{ id: string }>
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -25,16 +25,13 @@ const useStyles = makeStyles((theme: Theme) => ({
 const Chart: FC<Props> = (props: Props) => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
+  const userId: number = parseInt(props.match.params.id)
 
   const [limit, setLimit] = useState<number>(100)
   const [user, setUser] = useState<User>()
   const [concentrationValues, setConcentrationValues] = useState<
     ConcentrationValue[]
   >([])
-
-  // eslint-disable-next-line
-  const createErrorMessage = (status: any, message: string): string =>
-    `Request failed.\n status: ${status}, message: ${message}`
 
   const getUser = useCallback(async (endpoint: string, userId: number): Promise<
     User
@@ -70,7 +67,7 @@ const Chart: FC<Props> = (props: Props) => {
             const isSitting = value.is_sitting
 
             return {
-              datetime: datetime,
+              datetime: formatToHMS(datetime),
               concentrationValue: concentrationValue,
               isSitting: isSitting
             }
@@ -82,30 +79,25 @@ const Chart: FC<Props> = (props: Props) => {
   )
 
   useEffect(() => {
-    getUser(`${apiUrl}/users`, props.userId)
+    getUser(`${apiUrl}/users`, userId)
       .then((user: User) => setUser(user))
       .catch(error => console.log(error))
 
-    getConcentrationValues(
-      `${apiUrl}/concentration_values`,
-      props.userId,
-      limit
-    )
+    getConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
       .then((concentrationValues: ConcentrationValue[]) =>
         setConcentrationValues(concentrationValues)
       )
       .catch(error => console.log(error))
-  }, [apiUrl, getConcentrationValues, getUser, limit, props.userId])
+  }, [apiUrl, getConcentrationValues, getUser, limit, userId])
 
   const chart = (): JSX.Element => {
-    // return users.map((user: User, index: number) => (
     return (
       <Box>
         <Typography variant="h2" className={classes.userName}>
           {user?.name}
         </Typography>
         <BarChart
-          width={2000}
+          width={1000}
           height={300}
           data={concentrationValues}
           className={classes.lineChart}
@@ -122,7 +114,7 @@ const Chart: FC<Props> = (props: Props) => {
           />
           <YAxis
             type="number"
-            domain={[1, 10]}
+            domain={[0, 10]}
             label={{
               value: 'concentration',
               angle: -90,
@@ -131,12 +123,10 @@ const Chart: FC<Props> = (props: Props) => {
             width={150}
           />
           <Tooltip formatter={value => [value, 'concentration']} />
-          {/*<Legend formatter={() => 'How concentrated'} iconSize={20} />*/}
           <Bar dataKey="concentrationValue" fill="#028C6A" />
         </BarChart>
       </Box>
     )
-    // ))
   }
 
   return (
