@@ -122,7 +122,7 @@ const Chart: FC<Props> = (props: Props) => {
           />
           <YAxis
             type="number"
-            domain={[1, 10]}
+            domain={[0, 10]}
             label={{
               value: 'concentration',
               angle: -90,
