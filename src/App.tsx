@@ -34,7 +34,7 @@ const App: FC = () => {
               }
             />
             <Route path="/sign-up" component={SignUp} />
-            <Route path="/charts/:id" render={props => <Chart {...props} />} />
+            <Route path="/charts/:id" component={Chart} />
             <Route path="/*" render={() => <Redirect to="/" />} />
           </Switch>
         </Box>

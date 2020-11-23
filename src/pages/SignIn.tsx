@@ -135,7 +135,7 @@ const SignIn: FC<Props> = (props: Props) => {
             color="primary"
             className={classes.button}
           >
-            OK
+            SIGN IN
           </Button>
         </Box>
       </form>
