@@ -105,7 +105,7 @@ const Chart: FC<Props> = (props: Props) => {
           {user?.name}
         </Typography>
         <BarChart
-          width={2000}
+          width={1000}
           height={300}
           data={concentrationValues}
           className={classes.lineChart}
