@@ -1,7 +1,8 @@
-import React, { ChangeEvent, FC, useState } from 'react'
+import React, { ChangeEvent, FC, useContext, useState } from 'react'
 import { Box, Button, TextField, Typography } from '@material-ui/core'
 import { RouteComponentProps } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
+import UserContext from '../contexts/UserContext'
 
 type Props = RouteComponentProps
 
@@ -30,36 +31,61 @@ const useStyles = makeStyles(() => ({
 const SignIn: FC<Props> = (props: Props) => {
   const classes = useStyles()
 
-  const [userId, setUserId] = useState<number>()
-  const [password, setPassword] = useState<string>()
+  const setUser = useContext(UserContext)?.setUser
 
-  const [errorUserId, setErrorUserId] = useState<boolean>(false)
-  const [errorPassword, setErrorPassword] = useState<boolean>(false)
+  const [inputtedUserId, setInputtedUserId] = useState<number | null>(null)
+  const [inputtedUserName, setInputtedUserName] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+
+  const [isErrorUserId, setIsErrorUserId] = useState<boolean>(false)
+  const [isErrorUserName, setIsErrorUserName] = useState<boolean>(false)
+  const [isErrorPassword, setIsErrorPassword] = useState<boolean>(false)
 
   const handleChangeUserId = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(event.target.value)
-    setUserId(value)
 
-    if (!isNaN(value)) setErrorUserId(false)
+    if (isNaN(value)) {
+      setInputtedUserId(null)
+      return
+    }
+
+    setInputtedUserId(value)
+    setIsErrorUserId(false)
   }
 
+  const handleChangeUserName = (event: ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value
+    setInputtedUserName(value)
+
+    if (value !== '') setIsErrorUserName(false)
+  }
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
 
-    if (value !== '') setErrorPassword(false)
+    if (value !== '') setIsErrorPassword(false)
   }
 
   const handleButtonClick = (): void => {
-    const isValidUserId = userId !== undefined
-    const isValidPassword = password !== undefined
+    if (setUser === undefined) return
 
-    setErrorUserId(!isValidUserId)
-    setErrorPassword(!isValidPassword)
+    const isValidInputtedUserId = inputtedUserId !== null
+    const isValidInputtedUserName = inputtedUserName !== ''
+    const isValidInputtedPassword = password !== ''
 
-    if (!isValidUserId || !isValidPassword) return
+    setIsErrorUserId(!isValidInputtedUserId)
+    setIsErrorUserName(!isValidInputtedUserName)
+    setIsErrorPassword(!isValidInputtedPassword)
 
-    props.history.push(`/charts/${userId}`)
+    if (inputtedUserId === null) return
+    if (!isValidInputtedUserName || !isValidInputtedPassword) return
+
+    setUser({
+      id: inputtedUserId,
+      name: inputtedUserName
+    })
+
+    props.history.push(`/charts/${inputtedUserId}`)
   }
 
   return (
@@ -74,10 +100,22 @@ const SignIn: FC<Props> = (props: Props) => {
             label="ユーザーID"
             required={true}
             type="number"
-            value={userId}
+            value={inputtedUserId ?? ''}
             onChange={handleChangeUserId}
-            helperText={errorUserId ? 'ユーザーIDを入力してください' : ''}
-            error={errorUserId}
+            helperText={isErrorUserId ? 'ユーザーIDを入力してください' : ''}
+            error={isErrorUserId}
+            className={classes.input}
+          />
+
+          <TextField
+            id="user-name"
+            label="お名前"
+            required={true}
+            type="text"
+            value={inputtedUserName}
+            onChange={handleChangeUserName}
+            helperText={isErrorUserName ? 'お名前を入力してください' : ''}
+            error={isErrorUserName}
             className={classes.input}
           />
           <TextField
@@ -87,8 +125,8 @@ const SignIn: FC<Props> = (props: Props) => {
             type="password"
             value={password}
             onChange={handleChangePassword}
-            helperText={errorPassword ? 'パスワードを入力してください' : ''}
-            error={errorPassword}
+            helperText={isErrorPassword ? 'パスワードを入力してください' : ''}
+            error={isErrorPassword}
             className={classes.input}
           />
           <Button
