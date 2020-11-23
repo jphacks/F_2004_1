@@ -99,7 +99,6 @@ const Chart: FC<Props> = (props: Props) => {
   }, [apiUrl, getConcentrationValues, getUser, limit, props.userId])
 
   const chart = (): JSX.Element => {
-    // return users.map((user: User, index: number) => (
     return (
       <Box>
         <Typography variant="h2" className={classes.userName}>
@@ -132,12 +131,10 @@ const Chart: FC<Props> = (props: Props) => {
             width={150}
           />
           <Tooltip formatter={value => [value, 'concentration']} />
-          {/*<Legend formatter={() => 'How concentrated'} iconSize={20} />*/}
           <Bar dataKey="concentrationValue" fill="#028C6A" />
         </BarChart>
       </Box>
     )
-    // ))
   }
 
   return (
