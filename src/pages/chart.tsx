@@ -6,6 +6,7 @@ import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
 import { createErrorMessage, formatToHM } from '../utils'
 import { RouteComponentProps } from 'react-router-dom'
+import useInterval from 'use-interval'
 
 type Props = RouteComponentProps<{ id: string }>
 
@@ -33,20 +34,26 @@ const Chart: FC<Props> = (props: Props) => {
     ConcentrationValue[]
   >([])
 
-  const getUser = useCallback(async (endpoint: string, userId: number): Promise<
-    User
-  > => {
-    const response = await fetch(`${endpoint}/${userId}`)
-    const json = await response.json()
+  const fetchUser = useCallback(
+    async (endpoint: string, userId: number): Promise<User> => {
+      const response = await fetch(`${endpoint}/${userId}`)
+      const json = await response.json()
 
-    if (json.status != 'success') {
-      throw Error(createErrorMessage(json.status, json.message))
-    }
+      if (json.status != 'success') {
+        throw Error(createErrorMessage(json.status, json.message))
+      }
 
-    return json.user
-  }, [])
+      return json.user
+    },
+    []
+  )
+  useEffect(() => {
+    fetchUser(`${apiUrl}/users`, userId)
+      .then((user: User) => setUser(user))
+      .catch(error => console.log(error))
+  }, [apiUrl, fetchUser, limit, userId])
 
-  const getConcentrationValues = useCallback(
+  const fetchConcentrationValues = useCallback(
     async (
       endpoint: string,
       userId: number,
@@ -79,16 +86,22 @@ const Chart: FC<Props> = (props: Props) => {
   )
 
   useEffect(() => {
-    getUser(`${apiUrl}/users`, userId)
-      .then((user: User) => setUser(user))
-      .catch(error => console.log(error))
-
-    getConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
+    fetchConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
       .then((concentrationValues: ConcentrationValue[]) =>
         setConcentrationValues(concentrationValues)
       )
       .catch(error => console.log(error))
-  }, [apiUrl, getConcentrationValues, getUser, limit, userId])
+  }, [apiUrl, fetchConcentrationValues, fetchUser, limit, userId])
+
+  useInterval(
+    () =>
+      fetchConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
+        .then((concentrationValues: ConcentrationValue[]) =>
+          setConcentrationValues(concentrationValues)
+        )
+        .catch(error => console.log(error)),
+    1000
+  )
 
   const chart = (): JSX.Element => {
     return (
