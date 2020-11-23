@@ -5,10 +5,9 @@ import { makeStyles, Theme } from '@material-ui/core/styles'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
 import { formatToHMS } from '../utils'
+import { RouteComponentProps } from 'react-router-dom'
 
-interface Props {
-  userId: number
-}
+type Props = RouteComponentProps<{ id: string }>
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -26,6 +25,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const Chart: FC<Props> = (props: Props) => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
+  const userId: number = parseInt(props.match.params.id)
 
   const [limit, setLimit] = useState<number>(100)
   const [user, setUser] = useState<User>()
@@ -83,20 +83,16 @@ const Chart: FC<Props> = (props: Props) => {
   )
 
   useEffect(() => {
-    getUser(`${apiUrl}/users`, props.userId)
+    getUser(`${apiUrl}/users`, userId)
       .then((user: User) => setUser(user))
       .catch(error => console.log(error))
 
-    getConcentrationValues(
-      `${apiUrl}/concentration_values`,
-      props.userId,
-      limit
-    )
+    getConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
       .then((concentrationValues: ConcentrationValue[]) =>
         setConcentrationValues(concentrationValues)
       )
       .catch(error => console.log(error))
-  }, [apiUrl, getConcentrationValues, getUser, limit, props.userId])
+  }, [apiUrl, getConcentrationValues, getUser, limit, userId])
 
   const chart = (): JSX.Element => {
     return (

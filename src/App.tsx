@@ -10,7 +10,7 @@ const App: FC = () => {
       <Router>
         <Switch>
           <Route exact path="/" component={SignIn} />
-          <Route path="/charts/:id" component={() => <Chart userId={1} />} />
+          <Route path="/charts/:id" component={Chart} />
         </Switch>
       </Router>
     </Box>
