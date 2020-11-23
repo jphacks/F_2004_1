@@ -2,6 +2,7 @@ import React, { ChangeEvent, FC, useState } from 'react'
 import { Box, Button, TextField, Typography } from '@material-ui/core'
 import { RouteComponentProps } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
+import { createErrorMessage } from '../utils'
 
 type Props = RouteComponentProps
 
@@ -23,7 +24,8 @@ const useStyles = makeStyles(() => ({
     marginBottom: '20px'
   },
   button: {
-    width: 100
+    width: 100,
+    marginTop: '20px'
   }
 }))
 
@@ -85,6 +87,11 @@ const SignUp: FC<Props> = (props: Props) => {
       body: data
     })
     const json = await response.json()
+
+    if (json.status != 'success') {
+      throw Error(createErrorMessage(json.status, json.message))
+    }
+
     const responseUserId = json.user.id
 
     props.history.push(`/charts/${responseUserId}`)

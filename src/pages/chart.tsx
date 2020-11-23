@@ -4,7 +4,7 @@ import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
-import { formatToHMS } from '../utils'
+import { createErrorMessage, formatToHMS } from '../utils'
 import { RouteComponentProps } from 'react-router-dom'
 
 type Props = RouteComponentProps<{ id: string }>
@@ -32,10 +32,6 @@ const Chart: FC<Props> = (props: Props) => {
   const [concentrationValues, setConcentrationValues] = useState<
     ConcentrationValue[]
   >([])
-
-  // eslint-disable-next-line
-  const createErrorMessage = (status: any, message: string): string =>
-    `Request failed.\n status: ${status}, message: ${message}`
 
   const getUser = useCallback(async (endpoint: string, userId: number): Promise<
     User

@@ -11,14 +11,16 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import { User } from './types'
 import UserContext from 'contexts/UserContext'
+import Header from './components/Header'
 
 const App: FC = () => {
   const [user, setUser] = useState<User>()
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      <Box>
-        <Router>
+      <Router>
+        <Header />
+        <Box>
           <Switch>
             <Route
               exact
@@ -35,8 +37,8 @@ const App: FC = () => {
             <Route path="/charts/:id" render={props => <Chart {...props} />} />
             <Route path="/*" render={() => <Redirect to="/" />} />
           </Switch>
-        </Router>
-      </Box>
+        </Box>
+      </Router>
     </UserContext.Provider>
   )
 }
