@@ -4,7 +4,7 @@ import { ConcentrationValue, User } from '../types'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import { Box, Typography } from '@material-ui/core'
 import LimitSlider from '../components/LimitSlider'
-import { createErrorMessage, formatToHMS } from '../utils'
+import { createErrorMessage, formatToHM } from '../utils'
 import { RouteComponentProps } from 'react-router-dom'
 
 type Props = RouteComponentProps<{ id: string }>
@@ -67,7 +67,7 @@ const Chart: FC<Props> = (props: Props) => {
             const isSitting = value.is_sitting
 
             return {
-              datetime: formatToHMS(datetime),
+              datetime: formatToHM(datetime),
               concentrationValue: concentrationValue,
               isSitting: isSitting
             }
