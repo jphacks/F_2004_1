@@ -12,6 +12,10 @@ const useStyles = makeStyles(() => ({
     '& > b': {
       fontSize: '24px'
     }
+  },
+  limitMinMax: {
+    display: 'flex',
+    justifyContent: 'space-between'
   }
 }))
 
@@ -25,7 +29,6 @@ const LimitSlider: FC<Props> = (props: Props) => {
     const adjustedValue = (value as number) * 3 + 10
     props.setLimit(adjustedValue)
   }
-  console.log(props.limit)
   return (
     <Box>
       <Typography id="limit-slider" className={classes.caption}>
@@ -36,6 +39,11 @@ const LimitSlider: FC<Props> = (props: Props) => {
         onChange={handleChange}
         aria-labelledby="limit-slider"
       />
+      <Box className={classes.limitMinMax}>
+        <Typography>10</Typography>
+        <Typography>160</Typography>
+        <Typography>310</Typography>
+      </Box>
     </Box>
   )
 }

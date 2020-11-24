@@ -12,6 +12,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core'
 import { createErrorMessage, formatToHM } from '../utils'
 import useInterval from 'use-interval'
+import Notification from '../components/Notification'
 
 interface Props {
   userId: string
@@ -54,7 +55,7 @@ const Chart: FC<Props> = (props: Props) => {
     fetchUser(`${apiUrl}/users`, userId)
       .then((user: User) => setUser(user))
       .catch(error => console.log(error))
-  }, [apiUrl, fetchUser, limit, userId])
+  }, [apiUrl, fetchUser, limit, setUser, userId])
 
   const fetchConcentrationValues = useCallback(
     async (
@@ -141,6 +142,11 @@ const Chart: FC<Props> = (props: Props) => {
           isAnimationActive={false}
         />
       </BarChart>
+      <Notification
+        concentrationValues={concentrationValues.map(
+          (value: ConcentrationValue) => value.concentrationValue
+        )}
+      />
     </Box>
   )
 }

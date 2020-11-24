@@ -33,7 +33,16 @@ const App: FC = () => {
                 )
               }
             />
-            <Route path="/sign-up" component={SignUp} />
+            <Route
+              path="/sign-up"
+              render={props =>
+                user === undefined ? (
+                  <SignUp {...props} />
+                ) : (
+                  <Redirect to={`/charts/${user.id}`} />
+                )
+              }
+            />
             <Route path="/charts/:id" component={Concentration} />
             <Route path="/*" render={() => <Redirect to="/" />} />
           </Switch>
