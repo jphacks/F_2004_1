@@ -1,52 +1,63 @@
-import React, { FC, useCallback, useEffect, useState } from 'react'
+import React, {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts'
 import { ConcentrationValue, User } from '../types'
-import { makeStyles, Theme } from '@material-ui/core/styles'
-import { Box, Typography } from '@material-ui/core'
-import LimitSlider from '../components/LimitSlider'
-import { createErrorMessage, formatToHMS } from '../utils'
-import { RouteComponentProps } from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles'
+import { Box } from '@material-ui/core'
+import { createErrorMessage, formatToHM } from '../utils'
+import useInterval from 'use-interval'
+import Notification from '../components/Notification'
 
-type Props = RouteComponentProps<{ id: string }>
+interface Props {
+  userId: string
+  limit: number
+  setUser: Dispatch<SetStateAction<User | undefined>>
+}
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    padding: `${theme.spacing(5)}px 0`
-  },
-  userName: {
-    textAlign: 'center'
-  },
-  lineChart: {
-    maxWidth: '90%',
-    margin: '10px auto 50px auto'
+const useStyles = makeStyles(() => ({
+  barChart: {
+    margin: '0 auto'
   }
 }))
 
 const Chart: FC<Props> = (props: Props) => {
   const classes = useStyles()
-  const apiUrl = process.env.REACT_APP_API_URL
-  const userId: number = parseInt(props.match.params.id)
 
-  const [limit, setLimit] = useState<number>(100)
-  const [user, setUser] = useState<User>()
+  const apiUrl = process.env.REACT_APP_API_URL
+  const userId: number = parseInt(props.userId)
+
+  const limit = props.limit
+  const setUser = props.setUser
   const [concentrationValues, setConcentrationValues] = useState<
     ConcentrationValue[]
   >([])
 
-  const getUser = useCallback(async (endpoint: string, userId: number): Promise<
-    User
-  > => {
-    const response = await fetch(`${endpoint}/${userId}`)
-    const json = await response.json()
+  const fetchUser = useCallback(
+    async (endpoint: string, userId: number): Promise<User> => {
+      const response = await fetch(`${endpoint}/${userId}`)
+      const json = await response.json()
 
-    if (json.status != 'success') {
-      throw Error(createErrorMessage(json.status, json.message))
-    }
+      if (json.status != 'success') {
+        throw Error(createErrorMessage(json.status, json.message))
+      }
 
-    return json.user
-  }, [])
+      return json.user
+    },
+    []
+  )
+  useEffect(() => {
+    fetchUser(`${apiUrl}/users`, userId)
+      .then((user: User) => setUser(user))
+      .catch(error => console.log(error))
+  }, [apiUrl, fetchUser, limit, setUser, userId])
 
-  const getConcentrationValues = useCallback(
+  const fetchConcentrationValues = useCallback(
     async (
       endpoint: string,
       userId: number,
@@ -67,7 +78,7 @@ const Chart: FC<Props> = (props: Props) => {
             const isSitting = value.is_sitting
 
             return {
-              datetime: formatToHMS(datetime),
+              datetime: formatToHM(datetime),
               concentrationValue: concentrationValue,
               isSitting: isSitting
             }
@@ -79,60 +90,63 @@ const Chart: FC<Props> = (props: Props) => {
   )
 
   useEffect(() => {
-    getUser(`${apiUrl}/users`, userId)
-      .then((user: User) => setUser(user))
-      .catch(error => console.log(error))
-
-    getConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
+    fetchConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
       .then((concentrationValues: ConcentrationValue[]) =>
         setConcentrationValues(concentrationValues)
       )
       .catch(error => console.log(error))
-  }, [apiUrl, getConcentrationValues, getUser, limit, userId])
+  }, [apiUrl, fetchConcentrationValues, fetchUser, limit, userId])
 
-  const chart = (): JSX.Element => {
-    return (
-      <Box>
-        <Typography variant="h2" className={classes.userName}>
-          {user?.name}
-        </Typography>
-        <BarChart
-          width={1000}
-          height={300}
-          data={concentrationValues}
-          className={classes.lineChart}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="datetime"
-            label={{
-              value: 'Datetime',
-              position: 'insideBottomRight',
-              fontSize: 30
-            }}
-            height={70}
-          />
-          <YAxis
-            type="number"
-            domain={[0, 10]}
-            label={{
-              value: 'concentration',
-              angle: -90,
-              fontSize: 30
-            }}
-            width={150}
-          />
-          <Tooltip formatter={value => [value, 'concentration']} />
-          <Bar dataKey="concentrationValue" fill="#028C6A" />
-        </BarChart>
-      </Box>
-    )
-  }
+  useInterval(
+    () =>
+      fetchConcentrationValues(`${apiUrl}/concentration_values`, userId, limit)
+        .then((concentrationValues: ConcentrationValue[]) =>
+          setConcentrationValues(concentrationValues)
+        )
+        .catch(error => console.log(error)),
+    1000
+  )
 
   return (
-    <Box className={classes.root}>
-      {chart()}
-      <LimitSlider limit={limit} setLimit={setLimit} />
+    <Box>
+      <BarChart
+        width={1000}
+        height={300}
+        data={concentrationValues}
+        className={classes.barChart}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="datetime"
+          label={{
+            value: 'Time',
+            position: 'insideBottomRight',
+            fontSize: 20
+          }}
+          height={50}
+        />
+        <YAxis
+          type="number"
+          domain={[0, 10]}
+          label={{
+            value: 'Concentration',
+            angle: -90,
+            fontSize: 20
+          }}
+          width={80}
+        />
+        <Tooltip formatter={value => [value, 'concentration']} />
+        <Bar
+          dataKey="concentrationValue"
+          fill="#18B861"
+          isAnimationActive={false}
+        />
+      </BarChart>
+      <Notification
+        concentrationValues={concentrationValues.map(
+          (value: ConcentrationValue) => value.concentrationValue
+        )}
+      />
     </Box>
   )
 }

@@ -14,6 +14,13 @@ export const formatToHMS = (datetime: Date): string => {
   return `${hour}:${minute}:${second}`
 }
 
+export const formatToHM = (datetime: Date): string => {
+  const hour = datetime.getHours()
+  const minute = datetime.getMinutes()
+
+  return `${hour}:${minute}`
+}
+
 // eslint-disable-next-line
 export const createErrorMessage = (status: any, message: string): string =>
   `Request failed.\n status: ${status}, message: ${message}`

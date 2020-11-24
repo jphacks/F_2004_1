@@ -5,13 +5,13 @@ import {
   Route,
   Switch
 } from 'react-router-dom'
-import Chart from './pages/chart'
 import { Box } from '@material-ui/core'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import { User } from './types'
 import UserContext from 'contexts/UserContext'
 import Header from './components/Header'
+import Concentration from './pages/Concentration'
 
 const App: FC = () => {
   const [user, setUser] = useState<User>()
@@ -33,8 +33,17 @@ const App: FC = () => {
                 )
               }
             />
-            <Route path="/sign-up" component={SignUp} />
-            <Route path="/charts/:id" render={props => <Chart {...props} />} />
+            <Route
+              path="/sign-up"
+              render={props =>
+                user === undefined ? (
+                  <SignUp {...props} />
+                ) : (
+                  <Redirect to={`/charts/${user.id}`} />
+                )
+              }
+            />
+            <Route path="/charts/:id" component={Concentration} />
             <Route path="/*" render={() => <Redirect to="/" />} />
           </Switch>
         </Box>
