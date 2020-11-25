@@ -26,7 +26,7 @@ jobs:
       - run:
           name: deploy to s3
           command: |
-            aws s3 sync build/ s3://hosting-effective-work-frontend --delete
+            aws s3 sync build/ s3://effective-work.tk --delete
 workflows:
   version: 2
   build-deploy:
