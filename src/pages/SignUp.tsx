@@ -37,9 +37,10 @@ const SignUp: FC<Props> = (props: Props) => {
   const [userName, setUserName] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
-  const [errorUserId, setErrorUserId] = useState<boolean>(false)
-  const [errorUserName, setErrorUserName] = useState<boolean>(false)
-  const [errorPassword, setErrorPassword] = useState<boolean>(false)
+  const [emptyUserId, setEmptyUserId] = useState<boolean>(false)
+  const [duplicateUserId, setduplicateUserId] = useState<boolean>(false)
+  const [emptyUserName, setEmptyUserName] = useState<boolean>(false)
+  const [emptyPassword, setEmptyPassword] = useState<boolean>(false)
 
   const handleChangeUserId = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(event.target.value)
@@ -50,21 +51,22 @@ const SignUp: FC<Props> = (props: Props) => {
     }
 
     setUserId(value)
-    setErrorUserId(false)
+    setEmptyUserId(false)
+    setduplicateUserId(false)
   }
 
   const handleChangeUserName = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setUserName(value)
 
-    if (value !== '') setErrorUserName(false)
+    if (value !== '') setEmptyUserName(false)
   }
 
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
 
-    if (value !== '') setErrorPassword(false)
+    if (value !== '') setEmptyPassword(false)
   }
 
   const handleButtonClick = async (): Promise<void> => {
@@ -72,11 +74,11 @@ const SignUp: FC<Props> = (props: Props) => {
     const isValidUserName = userName !== ''
     const isValidPassword = password !== ''
 
-    setErrorUserId(!isValidUserId)
-    setErrorUserName(!isValidUserName)
-    setErrorPassword(!isValidPassword)
+    setEmptyUserId(!isValidUserId)
+    setEmptyUserName(!isValidUserName)
+    setEmptyPassword(!isValidPassword)
 
-    if (!isValidUserId || !isValidPassword) return
+    if (!isValidUserId || !isValidUserName || !isValidPassword) return
 
     const data = new FormData()
     data.append('id', `${userId}`)
@@ -88,13 +90,29 @@ const SignUp: FC<Props> = (props: Props) => {
     })
     const json = await response.json()
 
-    if (json.status != 'success') {
+    if (
+      json.status !== 'success' &&
+      json.message === 'Requested user id exists already.'
+    ) {
+      setduplicateUserId(true)
+      return
+    }
+
+    if (json.status !== 'success') {
       throw Error(createErrorMessage(json.status, json.message))
     }
 
     const responseUserId = json.user.id
 
     props.history.push(`/charts/${responseUserId}`)
+  }
+
+  const getUserIdErrorMessage = (): string => {
+    if (emptyUserId) return 'ユーザーIDを入力してください'
+
+    if (duplicateUserId) return '既に存在するユーザーIDです'
+
+    return ''
   }
 
   return (
@@ -111,8 +129,8 @@ const SignUp: FC<Props> = (props: Props) => {
             type="number"
             value={userId ?? ''}
             onChange={handleChangeUserId}
-            helperText={errorUserId ? 'ユーザーIDを入力してください' : ''}
-            error={errorUserId}
+            helperText={getUserIdErrorMessage()}
+            error={emptyUserId || duplicateUserId}
             className={classes.input}
           />{' '}
           <TextField
@@ -122,8 +140,8 @@ const SignUp: FC<Props> = (props: Props) => {
             type="text"
             value={userName ?? ''}
             onChange={handleChangeUserName}
-            helperText={errorUserName ? 'お名前を入力してください' : ''}
-            error={errorUserName}
+            helperText={emptyUserName ? 'お名前を入力してください' : ''}
+            error={emptyUserName}
             className={classes.input}
           />
           <TextField
@@ -133,8 +151,8 @@ const SignUp: FC<Props> = (props: Props) => {
             type="password"
             value={password ?? ''}
             onChange={handleChangePassword}
-            helperText={errorPassword ? 'パスワードを入力してください' : ''}
-            error={errorPassword}
+            helperText={emptyPassword ? 'パスワードを入力してください' : ''}
+            error={emptyPassword}
             className={classes.input}
           />
           <Button
