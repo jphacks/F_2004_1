@@ -35,11 +35,9 @@ const SignIn: FC<Props> = (props: Props) => {
   const setUser = useContext(UserContext)?.setUser
 
   const [inputtedUserId, setInputtedUserId] = useState<number | null>(null)
-  const [inputtedUserName, setInputtedUserName] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
   const [isErrorUserId, setIsErrorUserId] = useState<boolean>(false)
-  const [isErrorUserName, setIsErrorUserName] = useState<boolean>(false)
   const [isErrorPassword, setIsErrorPassword] = useState<boolean>(false)
 
   const handleChangeUserId = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -54,12 +52,6 @@ const SignIn: FC<Props> = (props: Props) => {
     setIsErrorUserId(false)
   }
 
-  const handleChangeUserName = (event: ChangeEvent<HTMLInputElement>): void => {
-    const value = event.target.value
-    setInputtedUserName(value)
-
-    if (value !== '') setIsErrorUserName(false)
-  }
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
@@ -71,19 +63,16 @@ const SignIn: FC<Props> = (props: Props) => {
     if (setUser === undefined) return
 
     const isValidInputtedUserId = inputtedUserId !== null
-    const isValidInputtedUserName = inputtedUserName !== ''
     const isValidInputtedPassword = password !== ''
 
     setIsErrorUserId(!isValidInputtedUserId)
-    setIsErrorUserName(!isValidInputtedUserName)
     setIsErrorPassword(!isValidInputtedPassword)
 
-    if (inputtedUserId === null) return
-    if (!isValidInputtedUserName || !isValidInputtedPassword) return
+    if (!isValidInputtedUserId || !isValidInputtedPassword) return
 
     setUser({
-      id: inputtedUserId,
-      name: inputtedUserName
+      id: inputtedUserId ?? -1,
+      name: ''
     })
 
     props.history.push(`/charts/${inputtedUserId}`)
@@ -107,17 +96,7 @@ const SignIn: FC<Props> = (props: Props) => {
             error={isErrorUserId}
             className={classes.input}
           />
-          <TextField
-            id="user-name"
-            label="お名前"
-            required={true}
-            type="text"
-            value={inputtedUserName}
-            onChange={handleChangeUserName}
-            helperText={isErrorUserName ? 'お名前を入力してください' : ''}
-            error={isErrorUserName}
-            className={classes.input}
-          />
+
           <TextField
             id="password"
             label="パスワード"
