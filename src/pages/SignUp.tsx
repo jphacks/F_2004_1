@@ -33,12 +33,14 @@ const SignUp: FC<Props> = (props: Props) => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
 
-  const [userId, setUserId] = useState<number | null>(null)
+  const [userId, setUserId] = useState<number>()
   const [userName, setUserName] = useState<string>('')
+  const [groupId, setGroupId] = useState<number>()
   const [password, setPassword] = useState<string>('')
 
   const [emptyUserId, setEmptyUserId] = useState<boolean>(false)
   const [duplicateUserId, setduplicateUserId] = useState<boolean>(false)
+  const [emptyGroupId, setEmptyGroupId] = useState<boolean>(false)
   const [emptyUserName, setEmptyUserName] = useState<boolean>(false)
   const [emptyPassword, setEmptyPassword] = useState<boolean>(false)
 
@@ -46,7 +48,7 @@ const SignUp: FC<Props> = (props: Props) => {
     const value = parseInt(event.target.value)
 
     if (isNaN(value)) {
-      setUserId(null)
+      setUserId(undefined)
       return
     }
 
@@ -62,6 +64,20 @@ const SignUp: FC<Props> = (props: Props) => {
     if (value !== '') setEmptyUserName(false)
   }
 
+  const handleChangeGroupId = (event: ChangeEvent<HTMLInputElement>): void => {
+    const value = parseInt(event.target.value)
+
+    if (isNaN(value)) {
+      setGroupId(undefined)
+      return
+    }
+
+    setGroupId(value)
+
+    setGroupId(value)
+    setEmptyGroupId(false)
+  }
+
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
@@ -70,12 +86,14 @@ const SignUp: FC<Props> = (props: Props) => {
   }
 
   const handleButtonClick = async (): Promise<void> => {
-    const isValidUserId = userId !== null
+    const isValidUserId = userId !== undefined
     const isValidUserName = userName !== ''
+    const isValidGroupId = groupId !== undefined
     const isValidPassword = password !== ''
 
     setEmptyUserId(!isValidUserId)
     setEmptyUserName(!isValidUserName)
+    setEmptyGroupId(!isValidGroupId)
     setEmptyPassword(!isValidPassword)
 
     if (!isValidUserId || !isValidUserName || !isValidPassword) return
@@ -83,6 +101,7 @@ const SignUp: FC<Props> = (props: Props) => {
     const data = new FormData()
     data.append('id', `${userId}`)
     data.append('name', userName)
+    data.append('group_id', `${groupId}`)
 
     const response = await fetch(`${apiUrl}/users`, {
       method: 'POST',
@@ -132,7 +151,7 @@ const SignUp: FC<Props> = (props: Props) => {
             helperText={getUserIdErrorMessage()}
             error={emptyUserId || duplicateUserId}
             className={classes.input}
-          />{' '}
+          />
           <TextField
             id="user-name"
             label="お名前"
@@ -145,8 +164,19 @@ const SignUp: FC<Props> = (props: Props) => {
             className={classes.input}
           />
           <TextField
+            id="group-id"
+            label="グループID"
+            required={true}
+            type="text"
+            value={groupId ?? ''}
+            onChange={handleChangeGroupId}
+            helperText={emptyGroupId ? 'グループIDを入力してください' : ''}
+            error={emptyGroupId}
+            className={classes.input}
+          />
+          <TextField
             id="password"
-            label="パスワード"
+            label="ユーザーパスワード"
             required={true}
             type="password"
             value={password ?? ''}
