@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core'
 import { createErrorMessage, formatToHM } from '../utils'
 import useInterval from 'use-interval'
-import Notification from '../components/Notification'
+import Notification from './Notification'
 
 interface Props {
   userId: string

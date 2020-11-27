@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react'
 import LimitSlider from '../components/LimitSlider'
 import { Box, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import Chart from './chart'
+import Chart from '../components/Chart'
 import { User } from '../types'
 import { RouteComponentProps } from 'react-router-dom'
 
