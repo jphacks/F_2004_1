@@ -5,7 +5,6 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core'
 import { createErrorMessage, formatToHM } from '../utils'
 import useInterval from 'use-interval'
-import Notification from './Notification'
 
 interface Props {
   userId: string
@@ -134,11 +133,11 @@ const Chart: FC<Props> = (props: Props) => {
           isAnimationActive={false}
         />
       </BarChart>
-      <Notification
-        concentrationValues={concentrationValues.map(
-          (value: ConcentrationValue) => value.concentrationValue
-        )}
-      />
+      {/*<Notification*/}
+      {/*  concentrationValues={concentrationValues.map(*/}
+      {/*    (value: ConcentrationValue) => value.concentrationValue*/}
+      {/*  )}*/}
+      {/*/>*/}
     </Box>
   )
 }
