@@ -33,54 +33,75 @@ const SignUp: FC<Props> = (props: Props) => {
   const classes = useStyles()
   const apiUrl = process.env.REACT_APP_API_URL
 
-  const [userId, setUserId] = useState<number | null>(null)
+  const [userId, setUserId] = useState<number>()
   const [userName, setUserName] = useState<string>('')
+  const [groupId, setGroupId] = useState<number>()
   const [password, setPassword] = useState<string>('')
 
-  const [errorUserId, setErrorUserId] = useState<boolean>(false)
-  const [errorUserName, setErrorUserName] = useState<boolean>(false)
-  const [errorPassword, setErrorPassword] = useState<boolean>(false)
+  const [emptyUserId, setEmptyUserId] = useState<boolean>(false)
+  const [duplicateUserId, setduplicateUserId] = useState<boolean>(false)
+  const [emptyGroupId, setEmptyGroupId] = useState<boolean>(false)
+  const [emptyUserName, setEmptyUserName] = useState<boolean>(false)
+  const [emptyPassword, setEmptyPassword] = useState<boolean>(false)
 
   const handleChangeUserId = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(event.target.value)
 
     if (isNaN(value)) {
-      setUserId(null)
+      setUserId(undefined)
       return
     }
 
     setUserId(value)
-    setErrorUserId(false)
+    setEmptyUserId(false)
+    setduplicateUserId(false)
   }
 
   const handleChangeUserName = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setUserName(value)
 
-    if (value !== '') setErrorUserName(false)
+    if (value !== '') setEmptyUserName(false)
+  }
+
+  const handleChangeGroupId = (event: ChangeEvent<HTMLInputElement>): void => {
+    const value = parseInt(event.target.value)
+
+    if (isNaN(value)) {
+      setGroupId(undefined)
+      return
+    }
+
+    setGroupId(value)
+
+    setGroupId(value)
+    setEmptyGroupId(false)
   }
 
   const handleChangePassword = (event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
     setPassword(value)
 
-    if (value !== '') setErrorPassword(false)
+    if (value !== '') setEmptyPassword(false)
   }
 
   const handleButtonClick = async (): Promise<void> => {
-    const isValidUserId = userId !== null
+    const isValidUserId = userId !== undefined
     const isValidUserName = userName !== ''
+    const isValidGroupId = groupId !== undefined
     const isValidPassword = password !== ''
 
-    setErrorUserId(!isValidUserId)
-    setErrorUserName(!isValidUserName)
-    setErrorPassword(!isValidPassword)
+    setEmptyUserId(!isValidUserId)
+    setEmptyUserName(!isValidUserName)
+    setEmptyGroupId(!isValidGroupId)
+    setEmptyPassword(!isValidPassword)
 
-    if (!isValidUserId || !isValidPassword) return
+    if (!isValidUserId || !isValidUserName || !isValidPassword) return
 
     const data = new FormData()
     data.append('id', `${userId}`)
     data.append('name', userName)
+    data.append('group_id', `${groupId}`)
 
     const response = await fetch(`${apiUrl}/users`, {
       method: 'POST',
@@ -88,13 +109,29 @@ const SignUp: FC<Props> = (props: Props) => {
     })
     const json = await response.json()
 
-    if (json.status != 'success') {
+    if (
+      json.status !== 'success' &&
+      json.message === 'Requested user id exists already.'
+    ) {
+      setduplicateUserId(true)
+      return
+    }
+
+    if (json.status !== 'success') {
       throw Error(createErrorMessage(json.status, json.message))
     }
 
     const responseUserId = json.user.id
 
     props.history.push(`/charts/${responseUserId}`)
+  }
+
+  const getUserIdErrorMessage = (): string => {
+    if (emptyUserId) return 'ユーザーIDを入力してください'
+
+    if (duplicateUserId) return '既に存在するユーザーIDです'
+
+    return ''
   }
 
   return (
@@ -111,10 +148,10 @@ const SignUp: FC<Props> = (props: Props) => {
             type="number"
             value={userId ?? ''}
             onChange={handleChangeUserId}
-            helperText={errorUserId ? 'ユーザーIDを入力してください' : ''}
-            error={errorUserId}
+            helperText={getUserIdErrorMessage()}
+            error={emptyUserId || duplicateUserId}
             className={classes.input}
-          />{' '}
+          />
           <TextField
             id="user-name"
             label="お名前"
@@ -122,19 +159,30 @@ const SignUp: FC<Props> = (props: Props) => {
             type="text"
             value={userName ?? ''}
             onChange={handleChangeUserName}
-            helperText={errorUserName ? 'お名前を入力してください' : ''}
-            error={errorUserName}
+            helperText={emptyUserName ? 'お名前を入力してください' : ''}
+            error={emptyUserName}
+            className={classes.input}
+          />
+          <TextField
+            id="group-id"
+            label="グループID"
+            required={true}
+            type="text"
+            value={groupId ?? ''}
+            onChange={handleChangeGroupId}
+            helperText={emptyGroupId ? 'グループIDを入力してください' : ''}
+            error={emptyGroupId}
             className={classes.input}
           />
           <TextField
             id="password"
-            label="パスワード"
+            label="ユーザーパスワード"
             required={true}
             type="password"
             value={password ?? ''}
             onChange={handleChangePassword}
-            helperText={errorPassword ? 'パスワードを入力してください' : ''}
-            error={errorPassword}
+            helperText={emptyPassword ? 'パスワードを入力してください' : ''}
+            error={emptyPassword}
             className={classes.input}
           />
           <Button

@@ -1,23 +1,16 @@
-import React, {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts'
 import { ConcentrationValue, User } from '../types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core'
 import { createErrorMessage, formatToHM } from '../utils'
 import useInterval from 'use-interval'
-import Notification from '../components/Notification'
+import Notification from './Notification'
 
 interface Props {
   userId: string
   limit: number
-  setUser: Dispatch<SetStateAction<User | undefined>>
+  setUser: (user: User) => void
 }
 
 const useStyles = makeStyles(() => ({
@@ -32,8 +25,7 @@ const Chart: FC<Props> = (props: Props) => {
   const apiUrl = process.env.REACT_APP_API_URL
   const userId: number = parseInt(props.userId)
 
-  const limit = props.limit
-  const setUser = props.setUser
+  const { limit, setUser } = props
   const [concentrationValues, setConcentrationValues] = useState<
     ConcentrationValue[]
   >([])
