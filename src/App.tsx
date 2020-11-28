@@ -11,7 +11,8 @@ import SignUp from './pages/SignUp'
 import { User } from './types'
 import UserContext from 'contexts/UserContext'
 import Header from './components/Header'
-import Concentration from './pages/Concentration'
+import GroupConcentrations from './pages/GroupConcentrations'
+import PersonalConcentration from './pages/PersonalConcentration'
 
 const App: FC = () => {
   const [user, setUser] = useState<User>()
@@ -43,7 +44,8 @@ const App: FC = () => {
                 )
               }
             />
-            <Route path="/charts/:id" component={Concentration} />
+            <Route exact path="/charts/:id" component={PersonalConcentration} />
+            <Route path="/charts/group/:id" component={GroupConcentrations} />
             <Route path="/*" render={() => <Redirect to="/" />} />
           </Switch>
         </Box>
